@@ -1,6 +1,5 @@
 from config import credentials
 from dateutil import parser
-from pprint import pprint
 from twitter import OAuth, TwitterStream
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -46,7 +45,6 @@ class User(Base):
     followers_count = Column(Integer)
 
 if __name__ == '__main__':
-
     twitter_stream = TwitterStream(auth=OAuth(OAUTH_TOKEN, OAUTH_SECRET,
                                               CONSUMER_KEY, CONSUMER_SECRET))
 
@@ -56,7 +54,6 @@ if __name__ == '__main__':
     counter = 0
     for tweet in tweets:
         if tweet.get('text'):
-            pprint(tweet.get('text'))
             counter += 1
 
             user = tweet['user']
@@ -76,8 +73,8 @@ if __name__ == '__main__':
             Session.add(u)
             Session.add(t)
 
-            # Commit every 50 tweets
-            if counter >= 50:
+            # Commit every 20 tweets
+            if counter >= 20:
                 Session.commit()
                 counter = 0
 
