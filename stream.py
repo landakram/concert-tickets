@@ -85,8 +85,10 @@ def run_tweetstream():
                     # Commit every 20 tweets
                     if counter >= 20:
                         Session.commit()
+                        print "Commiting..."
                         counter = 0
     except:
+        print "Commiting due to exception..."
         Session.commit()
         send_error_email()
 
