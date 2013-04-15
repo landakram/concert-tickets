@@ -16,7 +16,7 @@ import smtplib
 import traceback
 import json
 
-engine = create_engine('sqlite:///test.db', echo=True)
+engine = create_engine('sqlite:///test.db')
 Base = declarative_base(bind=engine)
 Session = scoped_session(sessionmaker(engine))
 
