@@ -91,9 +91,9 @@ def run_tweetstream():
                         print "Commiting..."
                         counter = 0
     except:
+        send_error_email()
         print "Commiting due to exception..."
         Session.commit()
-        send_error_email()
 
 def send_error_email():
     fromaddr = 'hudnall.mark@gmail.com'
