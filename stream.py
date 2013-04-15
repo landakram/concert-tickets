@@ -66,9 +66,12 @@ def run_tweetstream():
                     counter += 1
 
                     user = tweet['user']
-                    u = User(id=user['id'],
-                            screen_name=user['screen_name'],
-                            followers_count=user['followers_count'])
+                    u = Session.query(User).filter(User.id == user['id']).first()
+                    if not u:
+                        u = User(id=user['id'],
+                                screen_name=user['screen_name'],
+                                followers_count=user['followers_count'])
+
                     t = Tweet(id=tweet['id'],
                             text=tweet['text'],
                             user_id=u.id,
