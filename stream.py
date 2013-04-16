@@ -47,49 +47,60 @@ class User(Base):
     followers_count = Column(Integer)
 
 
-def run_tweetstream():
+def do_stream():
     words = ['outsidelands', 'outside lands']
+    with tweetstream.FilterStream(credentials['username'],
+                                credentials['password'],
+                                track=words) as stream:
+
+        print "Done."
+        counter = 0
+        print "Starting loop-di-loop..."
+        for tweet in stream:
+            print "Got tweet..."
+            if tweet.get('text'):
+                print "It's an actual tweet: %s" % (tweet.get('text'))
+
+                counter += 1
+
+                user = tweet['user']
+                u = Session.query(User).filter(User.id == user['id']).first()
+                if not u:
+                    u = User(id=user['id'],
+                            screen_name=user['screen_name'],
+                            followers_count=user['followers_count'])
+
+                t = Tweet(id=tweet['id'],
+                        text=tweet['text'],
+                        user_id=u.id,
+                        favorite_count=tweet['favorite_count'],
+                        created_at=parser.parse(tweet['created_at']),
+                        retweet_count=tweet['retweet_count'],
+                        truncated=tweet['truncated'],
+                        coordinates=json.dumps(tweet['coordinates']),
+                        place=json.dumps(tweet['place']))
+
+                Session.add(u)
+                Session.add(t)
+
+                # Commit every 20 tweets
+                if counter >= 20:
+                    Session.commit()
+                    print "Commiting..."
+                    counter = 0
+
+def run_tweetstream():
     try:
-        print "Setting up FilterStream..."
-        with tweetstream.FilterStream(credentials['username'],
-                                    credentials['password'],
-                                    track=words) as stream:
+        while 1:
+            print "Setting up FilterStream..."
+            try:
+                do_stream()
+            except tweetstream.ConnectionError as e:
+                send_error_email()
+                print "Commiting due to exception... Attempting to restart..."
+                Session.commit()
+                pass
 
-            print "Done."
-            counter = 0
-            print "Starting loop-di-loop..."
-            for tweet in stream:
-                print "Got tweet..."
-                if tweet.get('text'):
-                    print "It's an actual tweet: %s" % (tweet.get('text'))
-
-                    counter += 1
-
-                    user = tweet['user']
-                    u = Session.query(User).filter(User.id == user['id']).first()
-                    if not u:
-                        u = User(id=user['id'],
-                                screen_name=user['screen_name'],
-                                followers_count=user['followers_count'])
-
-                    t = Tweet(id=tweet['id'],
-                            text=tweet['text'],
-                            user_id=u.id,
-                            favorite_count=tweet['favorite_count'],
-                            created_at=parser.parse(tweet['created_at']),
-                            retweet_count=tweet['retweet_count'],
-                            truncated=tweet['truncated'],
-                            coordinates=json.dumps(tweet['coordinates']),
-                            place=json.dumps(tweet['place']))
-
-                    Session.add(u)
-                    Session.add(t)
-
-                    # Commit every 20 tweets
-                    if counter >= 20:
-                        Session.commit()
-                        print "Commiting..."
-                        counter = 0
     except:
         send_error_email()
         print "Commiting due to exception..."
