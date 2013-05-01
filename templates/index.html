@@ -362,6 +362,7 @@
             <div id="chart" class="rickshaw_graph"></div>
             <div id="legend_container"></div>
             <div id="slider"></div>
+            <div id="timeline" class="rickshaw_annotation_timeline"></div>
         </div>
         
         <script type="text/javascript">
@@ -410,7 +411,6 @@
                 ]
             });
 
-            graph.render();
 
             var hoverDetail = new Rickshaw.Graph.HoverDetail({
                 graph: graph,
@@ -427,8 +427,17 @@
                 graph:graph         
             });
 
+            var annotator = new Rickshaw.Graph.Annotate({
+                element: document.getElementById('timeline'),
+                graph: graph
+            });
+            annotator.add(new Date("4/16/2013 9:00 AM").getTime(), "lineup announced");
+            annotator.add(new Date("4/18/2013 12:00 PM").getTime(), "tickets go on sale");
+
+            graph.render();
             yAxis.render();
             xAxis.render();
+
         </script>
     </body>
 </html>
